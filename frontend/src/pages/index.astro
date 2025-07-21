@@ -1,16 +1,17 @@
 ---
-
+import RutaVisual from "../components/RutaVisual.jsx";
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Simulador Ambulancia CABA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  </head>
+  <body style="padding: 1rem; font-family: sans-serif;">
+    <h1>🚑 Simulador de Emergencia</h1>
+
+    <!-- Contiene formulario, lógica y visualización -->
+    <RutaVisual client:only="react" />
+  </body>
 </html>
