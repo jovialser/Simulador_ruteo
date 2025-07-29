@@ -28,28 +28,38 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
   const enviar = async (e) => {
     e.preventDefault();
+    console.log("🚨 Simulación iniciada");
+
     const zona = e.target.zona.value;
     const tipo_via = e.target.tipo_via.value;
     const distancia_km = parseFloat(e.target.distancia_km.value);
 
-    const res = await fetch("https://simulador-backend.onrender.com/asignar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ zona, tipo_via, distancia_km }),
-    });
+    let datos;
+    try {
+      const res = await fetch("https://simulador-backend.onrender.com/asignar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ zona, tipo_via, distancia_km }),
+      });
 
-    const datos = await res.json();
-    setResultado(datos);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      datos = await res.json();
+      console.log("✅ Respuesta recibida:", datos);
+      setResultado(datos);
+    } catch (err) {
+      console.error("❌ Error en fetch:", err.message);
+      setResultado(null);
+      return;
+    }
 
     const centro = determinarCentro(zona);
     const origenCoords = coordenadasCentro[centro];
     const destinoCoords = coordenadasZona[zona];
 
-    // 🔁 Pasamos coords al componente superior (como index.astro)
     if (onCoordenadasSeleccionadas) {
-  console.log("🛰️ Emitiendo coordenadas:", origenCoords, destinoCoords);
-  onCoordenadasSeleccionadas({ origen: origenCoords, destino: destinoCoords });
-}
+      console.log("🛰️ Emitiendo coordenadas:", origenCoords, destinoCoords);
+      onCoordenadasSeleccionadas({ origen: origenCoords, destino: destinoCoords });
+    }
 
     const simulacion = {
       id: datos.ambulancia,
@@ -88,7 +98,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         <button type="submit">Asignar Ambulancia</button>
       </form>
 
-      {resultado && (
+      {resultado ? (
         <>
           <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
             <h2>🟢 Resultado (Tradicional)</h2>
@@ -104,9 +114,11 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
             distancia_km={parseFloat(resultado.eta_minutos) / (resultado.tipo_via === "avenida" ? 1.0 : 1.5)}
           />
         </>
-      )}
+      ) : null}
 
       <MetricasEficiencia historial={historial} />
     </div>
   );
 }
+
+
