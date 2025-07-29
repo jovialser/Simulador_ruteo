@@ -32,7 +32,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     const tipo_via = e.target.tipo_via.value;
     const distancia_km = parseFloat(e.target.distancia_km.value);
 
-    const res = await fetch("http://localhost:8000/asignar", {
+    const res = await fetch("https://simulador-backend.onrender.com/asignar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ zona, tipo_via, distancia_km }),
