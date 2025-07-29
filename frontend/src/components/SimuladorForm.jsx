@@ -112,35 +112,37 @@ const ciudadesArgentinas = {
     setHistorial(prev => [...prev, simulacion]);
   };
 
-  return (
-  <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
-  <h3>📌 Buscar ubicación manual</h3>
+ return (
+    <div>
+      {/* 🔍 Buscador de dirección */}
+      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+        <h3>📌 Buscar ubicación manual</h3>
 
-  {/* 🌎 Selector de ciudades argentinas */}
-  <label style={{ display: "block", marginBottom: "0.5rem" }}>
-    🌎 Ciudad rápida:
-    <select onChange={(e) => setDireccion(ciudadesArgentinas[e.target.value])}>
-      <option value="">-- Seleccionar ciudad --</option>
-      {Object.keys(ciudadesArgentinas).map(ciudad => (
-        <option key={ciudad} value={ciudad}>{ciudad}</option>
-      ))}
-    </select>
-  </label>
+        {/* 🌎 Selector de ciudades argentinas */}
+        <label style={{ display: "block", marginBottom: "0.5rem" }}>
+          🌎 Ciudad rápida:
+          <select onChange={(e) => setDireccion(ciudadesArgentinas[e.target.value])}>
+            <option value="">-- Seleccionar ciudad --</option>
+            {Object.keys(ciudadesArgentinas).map(ciudad => (
+              <option key={ciudad} value={ciudad}>{ciudad}</option>
+            ))}
+          </select>
+        </label>
 
-  {/* Campo de dirección */}
-  <input
-    type="text"
-    placeholder="Ej: Av. Rivadavia 1234"
-    value={direccion}
-    onChange={(e) => setDireccion(e.target.value)}
-    style={{ marginRight: "0.5rem" }}
-  />
-  <button onClick={buscarUbicacion}>Buscar ubicación</button>
+        {/* Campo de dirección */}
+        <input
+          type="text"
+          placeholder="Ej: Av. Rivadavia 1234"
+          value={direccion}
+          onChange={(e) => setDireccion(e.target.value)}
+          style={{ marginRight: "0.5rem" }}
+        />
+        <button onClick={buscarUbicacion}>Buscar ubicación</button>
 
-  {ubicacion && (
-    <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
-  )}
-</div>
+        {ubicacion && (
+          <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
+        )}
+      </div>
 
       {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
@@ -162,7 +164,9 @@ const ciudadesArgentinas = {
           </select>
         </label><br />
 
-        <label>Distancia (km): <input type="number" step="0.1" name="distancia_km" required /></label><br />
+        <label>Distancia (km):
+          <input type="number" step="0.1" name="distancia_km" required />
+        </label><br />
         <button type="submit">Asignar Ambulancia</button>
       </form>
 
@@ -188,5 +192,6 @@ const ciudadesArgentinas = {
       {/* 📊 Métricas */}
       <MetricasEficiencia historial={historial} />
     </div>
-  );
+);
+
 }
