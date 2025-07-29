@@ -5,9 +5,6 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn backend.main:app --host 0.0.0.0 --port 10000"
     env: python
-    region: frankfurt  # Podés cambiar a 'oregon' si preferís EEUU
+    region: oregon  # Podés cambiar a 'oregon' si preferís EEUU
     plan: free
-
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.11
+  
