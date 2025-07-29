@@ -9,23 +9,45 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [ubicacion, setUbicacion] = useState(null);
 
   const coordenadasZona = {
-    Palermo: [-34.578, -58.429],
-    Belgrano: [-34.563, -58.460],
-    Recoleta: [-34.587, -58.392],
-    Caballito: [-34.618, -58.441],
-    Barracas: [-34.630, -58.373],
+    "Buenos Aires": [-34.6037, -58.3816],
+    "Córdoba": [-31.4201, -64.1888],
+    "Rosario": [-32.9442, -60.6505],
+    "Mar del Plata": [-38.0055, -57.5426],
+    "San Miguel de Tucumán": [-26.8241, -65.2226],
+    "Salta": [-24.7821, -65.4232],
+    "Santa Fe": [-31.623, -60.695],
+    "Corrientes": [-27.4697, -58.8306],
+    "Bahía Blanca": [-38.7183, -62.2676],
+    "Resistencia": [-27.4516, -58.986],
+    "Posadas": [-27.3671, -55.8961],
+    "Merlo": [-34.6645, -58.7277],
+    "Quilmes": [-34.729, -58.267],
+    "San Salvador de Jujuy": [-24.1946, -65.2971],
+    "Guaymallén": [-32.8834, -68.8387],
+    "Santiago del Estero": [-27.7951, -64.2615],
+    "Paraná": [-31.7433, -60.5176],
+    "Neuquén": [-38.9517, -68.0591],
+    "Formosa": [-26.1852, -58.1765],
+    "Lanús": [-34.7076, -58.3915],
+    "La Plata": [-34.9214, -57.954],
+    "Godoy Cruz": [-32.9167, -68.8333],
+    "La Rioja": [-29.4131, -66.8558],
+    "Comodoro Rivadavia": [-45.8648, -67.4825]
   };
 
-  const coordenadasCentro = {
-    "Centro Norte": [-34.560, -58.420],
-    "Centro Este": [-34.580, -58.425],
-    "Centro Sur": [-34.640, -58.400],
-  };
+  function determinarCentro(ciudad) {
+    const regiones = {
+      norte: ["Salta", "San Miguel de Tucumán", "San Salvador de Jujuy", "Santiago del Estero", "Formosa"],
+      centro: ["Buenos Aires", "Córdoba", "Rosario", "Santa Fe", "Paraná", "La Plata", "Merlo", "Quilmes", "Lanús"],
+      cuyo: ["Mendoza", "Guaymallén", "Godoy Cruz", "La Rioja"],
+      sur: ["Bahía Blanca", "Neuquén", "Comodoro Rivadavia", "Mar del Plata"],
+      litoral: ["Corrientes", "Resistencia", "Posadas"]
+    };
 
-  function determinarCentro(zona) {
-    if (["Palermo", "Recoleta"].includes(zona)) return "Centro Norte";
-    if (["Belgrano", "Caballito"].includes(zona)) return "Centro Este";
-    return "Centro Sur";
+    for (const [region, ciudades] of Object.entries(regiones)) {
+      if (ciudades.includes(ciudad)) return region;
+    }
+    return "desconocido";
   }
 
   const buscarUbicacion = async () => {
@@ -84,7 +106,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     }
 
     const centro = determinarCentro(zona);
-    const origenCoords = coordenadasCentro[centro];
+    const origenCoords = coordenadasZona[centro] || [0, 0]; // coordenadas genéricas si no se encuentra
     const destinoCoords = coordenadasZona[zona];
 
     if (onCoordenadasSeleccionadas) {
@@ -125,14 +147,12 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
       {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
-        <label>Zona:
+        <label>Ciudad:
           <select name="zona" required>
-            <option value="">-- Seleccionar zona --</option>
-            <option value="Palermo">Palermo</option>
-            <option value="Belgrano">Belgrano</option>
-            <option value="Recoleta">Recoleta</option>
-            <option value="Caballito">Caballito</option>
-            <option value="Barracas">Barracas</option>
+            <option value="">-- Seleccionar ciudad --</option>
+            {Object.keys(coordenadasZona).map((ciudad, i) => (
+              <option key={i} value={ciudad}>{ciudad}</option>
+            ))}
           </select>
         </label><br />
 
@@ -171,3 +191,4 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     </div>
   );
 }
+
