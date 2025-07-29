@@ -7,7 +7,15 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [historial, setHistorial] = useState([]);
   const [direccion, setDireccion] = useState("");
   const [ubicacion, setUbicacion] = useState(null);
-
+  
+const ciudadesArgentinas = {
+  "Buenos Aires": "Av. Rivadavia 1234, Buenos Aires",
+  "Córdoba": "Av. Colón 350, Córdoba",
+  "Rosario": "Calle San Luis 123, Rosario",
+  "Mendoza": "Av. San Martín 750, Mendoza",
+  "La Plata": "Calle 12 456, La Plata"
+};
+  
   const coordenadasZona = {
     Palermo: [-34.578, -58.429],
     Belgrano: [-34.563, -58.460],
@@ -105,23 +113,34 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   };
 
   return (
-    <div>
-      {/* 🔍 Buscador de dirección */}
-      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
-        <h3>📌 Buscar ubicación manual</h3>
-        <input
-          type="text"
-          placeholder="Ej: Av. Rivadavia 1234"
-          value={direccion}
-          onChange={(e) => setDireccion(e.target.value)}
-          style={{ marginRight: "0.5rem" }}
-        />
-        <button onClick={buscarUbicacion}>Buscar ubicación</button>
+  <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+  <h3>📌 Buscar ubicación manual</h3>
 
-        {ubicacion && (
-          <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
-        )}
-      </div>
+  {/* 🌎 Selector de ciudades argentinas */}
+  <label style={{ display: "block", marginBottom: "0.5rem" }}>
+    🌎 Ciudad rápida:
+    <select onChange={(e) => setDireccion(ciudadesArgentinas[e.target.value])}>
+      <option value="">-- Seleccionar ciudad --</option>
+      {Object.keys(ciudadesArgentinas).map(ciudad => (
+        <option key={ciudad} value={ciudad}>{ciudad}</option>
+      ))}
+    </select>
+  </label>
+
+  {/* Campo de dirección */}
+  <input
+    type="text"
+    placeholder="Ej: Av. Rivadavia 1234"
+    value={direccion}
+    onChange={(e) => setDireccion(e.target.value)}
+    style={{ marginRight: "0.5rem" }}
+  />
+  <button onClick={buscarUbicacion}>Buscar ubicación</button>
+
+  {ubicacion && (
+    <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
+  )}
+</div>>
 
       {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
