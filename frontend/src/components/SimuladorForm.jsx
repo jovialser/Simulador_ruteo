@@ -105,61 +105,23 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   };
 
   return (
-    <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
-  <h3>📌 Buscar ubicación manual</h3>
+    <div>
+      {/* 🔍 Buscador de dirección */}
+      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+        <h3>📌 Buscar ubicación manual</h3>
+        <input
+          type="text"
+          placeholder="Ej: Av. Rivadavia 1234"
+          value={direccion}
+          onChange={(e) => setDireccion(e.target.value)}
+          style={{ marginRight: "0.5rem" }}
+        />
+        <button onClick={buscarUbicacion}>Buscar ubicación</button>
 
-  <label>Ciudad:
-    <select
-      value={ciudadSeleccionada}
-      onChange={(e) => setCiudadSeleccionada(e.target.value)}
-      style={{ marginBottom: "0.5rem", marginLeft: "0.5rem" }}
-    >
-      <option value="">-- Seleccionar ciudad --</option>
-      <option value="Buenos Aires">Buenos Aires</option>
-      <option value="Córdoba">Córdoba</option>
-      <option value="Rosario">Rosario</option>
-      <option value="Mendoza">Mendoza</option>
-      <option value="San Miguel de Tucumán">San Miguel de Tucumán</option>
-      <option value="Salta">Salta</option>
-      <option value="Santa Fe">Santa Fe</option>
-      <option value="Mar del Plata">Mar del Plata</option>
-      <option value="La Plata">La Plata</option>
-      <option value="San Juan">San Juan</option>
-      <option value="Resistencia">Resistencia</option>
-      <option value="Neuquén">Neuquén</option>
-      <option value="Posadas">Posadas</option>
-      <option value="San Salvador de Jujuy">San Salvador de Jujuy</option>
-      <option value="Bahía Blanca">Bahía Blanca</option>
-      <option value="Paraná">Paraná</option>
-      <option value="Formosa">Formosa</option>
-      <option value="San Luis">San Luis</option>
-      <option value="Catamarca">Catamarca</option>
-      <option value="La Rioja">La Rioja</option>
-      <option value="Rio Gallegos">Río Gallegos</option>
-      <option value="Ushuaia">Ushuaia</option>
-      <option value="Río Grande">Río Grande</option>
-      <option value="Viedma">Viedma</option>
-    </select>
-  </label>
-
-  <br />
-
-  <input
-    type="text"
-    placeholder="Ej: Av. Rivadavia 1234"
-    value={direccion}
-    onChange={(e) => setDireccion(e.target.value)}
-    style={{ marginTop: "0.5rem", marginRight: "0.5rem" }}
-  />
-  <button onClick={buscarUbicacion}>Buscar ubicación</button>
-
-  {ubicacion && (
-    <p style={{ marginTop: "0.5rem" }}>
-      🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong>
-    </p>
-  )}
-</div>
-
+        {ubicacion && (
+          <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
+        )}
+      </div>
 
       {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
