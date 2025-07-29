@@ -36,7 +36,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
     let datos;
     try {
-      const res = await fetch("https://simulador-ruteo.onrender.com", {
+      const res = await fetch("https://simulador-ruteo.onrender.com/asignar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ zona, tipo_via, distancia_km }),
