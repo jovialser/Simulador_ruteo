@@ -5,6 +5,8 @@ import ComparadorEstrategias from './ComparadorEstrategias.jsx';
 export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [resultado, setResultado] = useState(null);
   const [historial, setHistorial] = useState([]);
+  const [direccion, setDireccion] = useState("");
+  const [ubicacion, setUbicacion] = useState(null);
 
   const coordenadasZona = {
     Palermo: [-34.578, -58.429],
@@ -25,6 +27,35 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     if (["Belgrano", "Caballito"].includes(zona)) return "Centro Este";
     return "Centro Sur";
   }
+
+  const buscarUbicacion = async () => {
+    if (!direccion) return alert("Ingresá una dirección");
+
+    try {
+      const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ direccion })
+      });
+
+      const data = await res.json();
+
+      if (data.lat && data.lng) {
+        setUbicacion({ lat: parseFloat(data.lat), lng: parseFloat(data.lng) });
+        alert(`📍 Ubicación encontrada: ${data.lat}, ${data.lng}`);
+        console.log("📌 Coordenadas:", data.lat, data.lng);
+
+        if (onCoordenadasSeleccionadas) {
+          onCoordenadasSeleccionadas({ origen: [data.lat, data.lng], destino: null });
+        }
+      } else {
+        alert("❌ Dirección no encontrada.");
+      }
+    } catch (err) {
+      console.error("⚠️ Error al buscar ubicación:", err);
+      alert("Hubo un problema al conectarse con el backend.");
+    }
+  };
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -75,6 +106,24 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
   return (
     <div>
+      {/* 🔍 Buscador de dirección */}
+      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+        <h3>📌 Buscar ubicación manual</h3>
+        <input
+          type="text"
+          placeholder="Ej: Av. Rivadavia 1234"
+          value={direccion}
+          onChange={(e) => setDireccion(e.target.value)}
+          style={{ marginRight: "0.5rem" }}
+        />
+        <button onClick={buscarUbicacion}>Buscar ubicación</button>
+
+        {ubicacion && (
+          <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
+        )}
+      </div>
+
+      {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
         <label>Zona:
           <select name="zona" required>
@@ -98,6 +147,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         <button type="submit">Asignar Ambulancia</button>
       </form>
 
+      {/* 🎯 Resultado */}
       {resultado ? (
         <>
           <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
@@ -116,9 +166,8 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         </>
       ) : null}
 
+      {/* 📊 Métricas */}
       <MetricasEficiencia historial={historial} />
     </div>
   );
 }
-
-
