@@ -140,7 +140,7 @@ const ciudadesArgentinas = {
   {ubicacion && (
     <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
   )}
-</div>>
+</div>
 
       {/* 🧪 Formulario de simulación */}
       <form onSubmit={enviar}>
