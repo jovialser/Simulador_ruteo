@@ -9,7 +9,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-                   "https://simulador-ruteo.vercel.app"],
+                   "https://simulador-ruteo-n5i5bg4ak-jovialsers-projects.vercel.app"],
     
 # Solo permite acceso desde Astro en localhost
     allow_credentials=True,
