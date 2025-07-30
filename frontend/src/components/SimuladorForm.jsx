@@ -37,7 +37,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     if (!ciudad || !direccion) return alert("Seleccioná ciudad y dirección.");
 
     const direccionCompleta = `${direccion}, ${ciudad}, Argentina`;
-
+console.log("🧪 Enviando dirección:", direccionCompleta); // 👈 Este es el log
     try {
       const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
         method: "POST",
