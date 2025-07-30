@@ -8,13 +8,13 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [direccion, setDireccion] = useState("");
   const [ubicacion, setUbicacion] = useState(null);
   
-const ciudadesArgentinas = {
-  "Buenos Aires": "Av. Rivadavia 1234, Buenos Aires",
-  "Córdoba": "Av. Colón 350, Córdoba",
-  "Rosario": "Calle San Luis 123, Rosario",
-  "Mendoza": "Av. San Martín 750, Mendoza",
-  "La Plata": "Calle 12 456, La Plata"
-};
+const ciudadesArgentinas = [
+  "Buenos Aires",
+  "Córdoba",
+  "Rosario",
+  "Mendoza",
+  "La Plata"
+];
   
   const coordenadasZona = {
     Palermo: [-34.578, -58.429],
@@ -119,15 +119,25 @@ const ciudadesArgentinas = {
         <h3>📌 Buscar ubicación manual</h3>
 
         {/* 🌎 Selector de ciudades argentinas */}
-        <label style={{ display: "block", marginBottom: "0.5rem" }}>
-          🌎 Ciudad rápida:
-          <select onChange={(e) => setDireccion(ciudadesArgentinas[e.target.value])}>
-            <option value="">-- Seleccionar ciudad --</option>
-            {Object.keys(ciudadesArgentinas).map(ciudad => (
-              <option key={ciudad} value={ciudad}>{ciudad}</option>
-            ))}
-          </select>
-        </label>
+      <label>
+  Ciudad:
+  <select value={ciudad} onChange={(e) => setCiudad(e.target.value)}>
+    <option value="">-- Seleccionar ciudad --</option>
+    {ciudadesArgentinas.map((c) => (
+      <option key={c} value={c}>{c}</option>
+    ))}
+  </select>
+</label>
+
+<label>
+  Dirección:
+  <input
+    type="text"
+    placeholder="Ej: Av. Rivadavia 1234"
+    value={direccion}
+    onChange={(e) => setDireccion(e.target.value)}
+  />
+</label>
 
         {/* Campo de dirección */}
         <input
