@@ -5,17 +5,14 @@ import ComparadorEstrategias from './ComparadorEstrategias.jsx';
 export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [resultado, setResultado] = useState(null);
   const [historial, setHistorial] = useState([]);
+  const [ciudad, setCiudad] = useState("");
   const [direccion, setDireccion] = useState("");
   const [ubicacion, setUbicacion] = useState(null);
-  
-const ciudadesArgentinas = [
-  "Buenos Aires",
-  "Córdoba",
-  "Rosario",
-  "Mendoza",
-  "La Plata"
-];
-  
+
+  const ciudadesArgentinas = [
+    "Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata"
+  ];
+
   const coordenadasZona = {
     Palermo: [-34.578, -58.429],
     Belgrano: [-34.563, -58.460],
@@ -37,13 +34,15 @@ const ciudadesArgentinas = [
   }
 
   const buscarUbicacion = async () => {
-    if (!direccion) return alert("Ingresá una dirección");
+    if (!ciudad || !direccion) return alert("Seleccioná ciudad y dirección.");
+
+    const direccionCompleta = `${direccion}, ${ciudad}, Argentina`;
 
     try {
       const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ direccion })
+        body: JSON.stringify({ direccion: direccionCompleta })
       });
 
       const data = await res.json();
@@ -112,41 +111,33 @@ const ciudadesArgentinas = [
     setHistorial(prev => [...prev, simulacion]);
   };
 
- return (
+  return (
     <div>
-      {/* 🔍 Buscador de dirección */}
+      {/* 📌 Búsqueda por ciudad + dirección */}
       <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
-        <h3>📌 Buscar ubicación manual</h3>
+        <h3>📍 Buscar ubicación manual</h3>
 
-        {/* 🌎 Selector de ciudades argentinas */}
-      <label>
-  Ciudad:
-  <select value={ciudad} onChange={(e) => setCiudad(e.target.value)}>
-    <option value="">-- Seleccionar ciudad --</option>
-    {ciudadesArgentinas.map((c) => (
-      <option key={c} value={c}>{c}</option>
-    ))}
-  </select>
-</label>
+        <label>
+          🌎 Ciudad:
+          <select value={ciudad} onChange={(e) => setCiudad(e.target.value)}>
+            <option value="">-- Seleccionar ciudad --</option>
+            {ciudadesArgentinas.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </label><br />
 
-<label>
-  Dirección:
-  <input
-    type="text"
-    placeholder="Ej: Av. Rivadavia 1234"
-    value={direccion}
-    onChange={(e) => setDireccion(e.target.value)}
-  />
-</label>
+        <label>
+          Dirección:
+          <input
+            type="text"
+            placeholder="Ej: Av. Rivadavia 1234"
+            value={direccion}
+            onChange={(e) => setDireccion(e.target.value)}
+            style={{ marginRight: "0.5rem" }}
+          />
+        </label>
 
-        {/* Campo de dirección */}
-        <input
-          type="text"
-          placeholder="Ej: Av. Rivadavia 1234"
-          value={direccion}
-          onChange={(e) => setDireccion(e.target.value)}
-          style={{ marginRight: "0.5rem" }}
-        />
         <button onClick={buscarUbicacion}>Buscar ubicación</button>
 
         {ubicacion && (
@@ -159,11 +150,9 @@ const ciudadesArgentinas = [
         <label>Zona:
           <select name="zona" required>
             <option value="">-- Seleccionar zona --</option>
-            <option value="Palermo">Palermo</option>
-            <option value="Belgrano">Belgrano</option>
-            <option value="Recoleta">Recoleta</option>
-            <option value="Caballito">Caballito</option>
-            <option value="Barracas">Barracas</option>
+            {Object.keys(coordenadasZona).map((zona) => (
+              <option key={zona} value={zona}>{zona}</option>
+            ))}
           </select>
         </label><br />
 
@@ -181,7 +170,7 @@ const ciudadesArgentinas = [
       </form>
 
       {/* 🎯 Resultado */}
-      {resultado ? (
+      {resultado && (
         <>
           <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
             <h2>🟢 Resultado (Tradicional)</h2>
@@ -197,11 +186,10 @@ const ciudadesArgentinas = [
             distancia_km={parseFloat(resultado.eta_minutos) / (resultado.tipo_via === "avenida" ? 1.0 : 1.5)}
           />
         </>
-      ) : null}
+      )}
 
       {/* 📊 Métricas */}
       <MetricasEficiencia historial={historial} />
     </div>
-);
-
+  );
 }
