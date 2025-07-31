@@ -66,7 +66,7 @@ async def geocodificar_direccion(request: Request):
 
     # 📦 Bounding boxes por ciudad
     BOUNDING_BOXES = {
-        "Ciudad de Buenos Aires": [-58.531, -34.705, -58.335, -34.526],
+        "Ciudad de Buenos Aires": [-58.531, -34.750, -58.335, -34.526],
         "Córdoba": [-64.264, -31.500, -64.059, -31.340],
         "Rosario": [-60.765, -32.997, -60.620, -32.880],
         "Mendoza": [-69.646, -35.619, -67.413, -32.345],
@@ -82,15 +82,17 @@ async def geocodificar_direccion(request: Request):
     url = (
         f"https://nominatim.openstreetmap.org/search"
         f"?format=json&q={direccion}"
-        f"&viewbox={bbox_str}&bounded=1"
+        f"&viewbox={bbox_str}" # 👈 sin bounded=1
     )
 
     response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
     datos = response.json()
 
-    if datos:
-        lat = datos[0]["lat"]
-        lon = datos[0]["lon"]
-        return {"lat": lat, "lng": lon}
-    else:
-        return {"error": "Dirección no encontrada"}
+# 🔍 Filtrar resultados que mencionen la ciudad
+    for lugar in datos:
+        if ciudad.lower() in lugar["display_name"].lower():
+            lat = lugar["lat"]
+            lon = lugar["lon"]
+            return {"lat": lat, "lng": lon}
+
+    return {"error": "Dirección no encontrada"}
