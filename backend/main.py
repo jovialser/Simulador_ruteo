@@ -60,6 +60,7 @@ def asignar_ambulancia_ia(datos: Emergencia):
 # 🧭 Geocodificación: Dirección → Coordenadas
 @app.post("/geocodificar")
 async def geocodificar_direccion(request: Request):
+data = await request.json()
 direccion = data["direccion"]
 ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
 
