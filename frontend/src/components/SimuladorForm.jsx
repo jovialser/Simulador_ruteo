@@ -6,8 +6,15 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [resultado, setResultado] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [ciudad, setCiudad] = useState("");
+
+  // --- Estados para la primera dirección (Origen) ---
   const [direccion, setDireccion] = useState("");
   const [ubicacion, setUbicacion] = useState(null);
+
+  // --- NUEVO: Estados para la segunda dirección (Destino) ---
+  const [direccionDestino, setDireccionDestino] = useState("");
+  const [ubicacionDestino, setUbicacionDestino] = useState(null);
+
 
   const ciudadesArgentinas = [
     "Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata"
@@ -21,6 +28,72 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     Barracas: [-34.630, -58.373],
   };
 
+  // --- Función genérica para geocodificar ---
+  const geocodificar = async (direccionCompleta) => {
+    try {
+      const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ direccion: direccionCompleta })
+      });
+      return await res.json();
+    } catch (err) {
+      console.error("⚠️ Error al buscar ubicación:", err);
+      alert("Hubo un problema al conectarse con el backend.");
+      return null;
+    }
+  };
+
+  // --- Función para buscar la ubicación de ORIGEN ---
+  const buscarUbicacionOrigen = async () => {
+    if (!direccion.trim() || !ciudad.trim()) {
+      alert("Ingresá una ciudad y una dirección de origen completa");
+      return;
+    }
+    const direccionCompleta = `${direccion}, ${ciudad}, Argentina`;
+    const data = await geocodificar(direccionCompleta);
+
+    if (data && data.lat && data.lng) {
+      const nuevasCoords = { lat: parseFloat(data.lat), lng: parseFloat(data.lng) };
+      setUbicacion(nuevasCoords);
+      alert(`📍 Origen encontrado: ${data.lat}, ${data.lng}`);
+      
+      // MODIFICADO: Notificar al mapa con ambas coordenadas
+      if (onCoordenadasSeleccionadas) {
+        const destinoCoords = ubicacionDestino ? [ubicacionDestino.lat, ubicacionDestino.lng] : null;
+        onCoordenadasSeleccionadas({ origen: [nuevasCoords.lat, nuevasCoords.lng], destino: destinoCoords });
+      }
+    } else {
+      alert("❌ Dirección de origen no encontrada.");
+    }
+  };
+
+  // --- NUEVO: Función para buscar la ubicación de DESTINO ---
+  const buscarUbicacionDestino = async () => {
+    if (!direccionDestino.trim() || !ciudad.trim()) {
+      alert("Ingresá una ciudad y una dirección de destino completa");
+      return;
+    }
+    const direccionCompleta = `${direccionDestino}, ${ciudad}, Argentina`;
+    const data = await geocodificar(direccionCompleta);
+
+    if (data && data.lat && data.lng) {
+      const nuevasCoords = { lat: parseFloat(data.lat), lng: parseFloat(data.lng) };
+      setUbicacionDestino(nuevasCoords);
+      alert(`📍 Destino encontrado: ${data.lat}, ${data.lng}`);
+
+      // MODIFICADO: Notificar al mapa con ambas coordenadas
+      if (onCoordenadasSeleccionadas) {
+        const origenCoords = ubicacion ? [ubicacion.lat, ubicacion.lng] : null;
+        onCoordenadasSeleccionadas({ origen: origenCoords, destino: [nuevasCoords.lat, nuevasCoords.lng] });
+      }
+    } else {
+      alert("❌ Dirección de destino no encontrada.");
+    }
+  };
+
+
+  // --- El resto de tus funciones (enviar, etc.) permanecen igual ---
   const coordenadasCentro = {
     "Centro Norte": [-34.560, -58.420],
     "Centro Este": [-34.580, -58.425],
@@ -32,42 +105,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     if (["Belgrano", "Caballito"].includes(zona)) return "Centro Este";
     return "Centro Sur";
   }
-
-  const buscarUbicacion = async () => {
-    if (!direccion.trim() || !ciudad.trim()) {
-      alert("Ingresá una ciudad y una dirección completa");
-      return;
-    }
-
-    const direccionCompleta = `${direccion}, ${ciudad}, Argentina`;
-    console.log("📨 Enviando dirección:", direccionCompleta);
-
-    try {
-      const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ direccion: direccionCompleta })
-      });
-
-      const data = await res.json();
-
-      if (data.lat && data.lng) {
-        setUbicacion({ lat: parseFloat(data.lat), lng: parseFloat(data.lng) });
-        alert(`📍 Ubicación encontrada: ${data.lat}, ${data.lng}`);
-        console.log("📌 Coordenadas:", data.lat, data.lng);
-
-        if (onCoordenadasSeleccionadas) {
-          onCoordenadasSeleccionadas({ origen: [data.lat, data.lng], destino: null });
-        }
-      } else {
-        alert("❌ Dirección no encontrada.");
-      }
-    } catch (err) {
-      console.error("⚠️ Error al buscar ubicación:", err);
-      alert("Hubo un problema al conectarse con el backend.");
-    }
-  };
-
+  
   const enviar = async (e) => {
     e.preventDefault();
     console.log("🚨 Simulación iniciada");
@@ -115,24 +153,26 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
     setHistorial(prev => [...prev, simulacion]);
   };
 
+
   return (
     <div>
-      {/* 🔍 Buscador de dirección */}
+      {/* Selector de ciudad compartido */}
       <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
-        <h3>📌 Buscar ubicación manual</h3>
-
-        {/* 🌎 Selector de ciudades argentinas */}
-        <label>🌎 Ciudad:
+        <label>
+          <h3>🌎 Ciudad (para ambas direcciones)</h3>
           <select value={ciudad} onChange={(e) => setCiudad(e.target.value)}>
             <option value="">-- Seleccionar ciudad --</option>
             {ciudadesArgentinas.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-        </label><br />
+        </label>
+      </div>
 
-        {/* Campo de dirección */}
-        <label>📍 Dirección:
+      {/* 🔍 Buscador de dirección de ORIGEN */}
+      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+        <h3>📌 Buscar ubicación de Origen</h3>
+        <label>📍 Dirección de Origen:
           <input
             type="text"
             placeholder="Ej: Av. Rivadavia 1234"
@@ -142,14 +182,33 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
           />
         </label>
         <br />
-        <button onClick={buscarUbicacion}>Buscar ubicación</button>
-
+        <button onClick={buscarUbicacionOrigen}>Buscar Origen</button>
         {ubicacion && (
-          <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
+          <p>🧭 Coordenadas Origen: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
         )}
       </div>
 
-      {/* 🧪 Formulario de simulación */}
+      {/* NUEVO: Buscador de dirección de DESTINO */}
+      <div style={{ marginBottom: "1rem", padding: "1rem", background: "#f0f8ff", borderRadius: "8px" }}>
+        <h3>🏁 Buscar ubicación de Destino</h3>
+        <label>📍 Dirección de Destino:
+          <input
+            type="text"
+            placeholder="Ej: Hospital Italiano"
+            value={direccionDestino}
+            onChange={(e) => setDireccionDestino(e.target.value)}
+            style={{ margin: "0.5rem 0" }}
+          />
+        </label>
+        <br />
+        <button onClick={buscarUbicacionDestino}>Buscar Destino</button>
+        {ubicacionDestino && (
+          <p>🧭 Coordenadas Destino: <strong>{ubicacionDestino.lat}, {ubicacionDestino.lng}</strong></p>
+        )}
+      </div>
+
+
+      {/* 🧪 Formulario de simulación (sin cambios) */}
       <form onSubmit={enviar}>
         <label>Zona:
           <select name="zona" required>
@@ -159,21 +218,19 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
             ))}
           </select>
         </label><br />
-
         <label>Tipo de vía:
           <select name="tipo_via">
             <option value="avenida">Avenida</option>
             <option value="calle">Calle</option>
           </select>
         </label><br />
-
         <label>Distancia (km):
           <input type="number" step="0.1" name="distancia_km" required />
         </label><br />
         <button type="submit">Asignar Ambulancia</button>
       </form>
 
-      {/* 🎯 Resultado */}
+      {/* 🎯 Resultado (sin cambios) */}
       {resultado && (
         <>
           <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
@@ -183,7 +240,6 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
             <p>Zona: {resultado.zona}</p>
             <p>Tipo de vía: {resultado.tipo_via}</p>
           </div>
-
           <ComparadorEstrategias
             zona={resultado.zona}
             tipo_via={resultado.tipo_via}
@@ -192,7 +248,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         </>
       )}
 
-      {/* 📊 Métricas */}
+      {/* 📊 Métricas (sin cambios) */}
       <MetricasEficiencia historial={historial} />
     </div>
   );
