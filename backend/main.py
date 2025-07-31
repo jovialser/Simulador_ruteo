@@ -60,19 +60,18 @@ def asignar_ambulancia_ia(datos: Emergencia):
 # 🧭 Geocodificación: Dirección → Coordenadas
 @app.post("/geocodificar")
 async def geocodificar_direccion(request: Request):
-data = await request.json()
-direccion = data["direccion"]
-ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
+    data = await request.json()
+    direccion = data["direccion"]
+    ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
 
-
-# 📦 Bounding boxes por ciudad
-BOUNDING_BOXES = {
-    "Ciudad de Buenos Aires": [-58.531, -34.705, -58.335, -34.526],
-    "Córdoba": [-64.264, -31.500, -64.059, -31.340],
-    "Rosario": [-60.765, -32.997, -60.620, -32.880],
-    "Mendoza": [-69.646, -35.619, -67.413, -32.345],
-    "La Plata": [-58.052, -35.000, -57.890, -34.890]
-}
+    # 📦 Bounding boxes por ciudad
+    BOUNDING_BOXES = {
+        "Ciudad de Buenos Aires": [-58.531, -34.705, -58.335, -34.526],
+        "Córdoba": [-64.264, -31.500, -64.059, -31.340],
+        "Rosario": [-60.765, -32.997, -60.620, -32.880],
+        "Mendoza": [-69.646, -35.619, -67.413, -32.345],
+        "La Plata": [-58.052, -35.000, -57.890, -34.890]
+    }
 
     bbox = BOUNDING_BOXES.get(ciudad)
     if not bbox:
@@ -86,8 +85,6 @@ BOUNDING_BOXES = {
         f"&viewbox={bbox_str}&bounded=1"
     )
 
-
-    
     response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
     datos = response.json()
 
