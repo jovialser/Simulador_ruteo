@@ -59,3 +59,17 @@ def asignar_ambulancia_ia(datos: Emergencia):
 
 # 🧭 Geocodificación: Dirección → Coordenadas
 @app.post("/geocodificar")
+async def geocodificar_direccion(request: Request):
+    data = await request.json()
+    direccion = data["direccion"]
+
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
+    response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
+    datos = response.json()
+
+    if datos:
+        lat = datos[0]["lat"]
+        lon = datos[0]["lon"]
+        return {"lat": lat, "lng": lon}
+    else:
+        return {"error": "Dirección no encontrada"}
