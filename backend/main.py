@@ -2,16 +2,14 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
-from urllib.parse import quote # <--- IMPORTANTE: Añadir esta línea
+from urllib.parse import quote_plus  # <--- CAMBIO 1: Importamos quote_plus
 
 app = FastAPI()
 
-# 👇 Agregamos el middleware CORS
+# ... (todo el resto del código no cambia) ...
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://simulador-ruteo.vercel.app"
-    ],
+    allow_origins=["https://simulador-ruteo.vercel.app"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -20,15 +18,14 @@ app.add_middleware(
 def inicio():
     return {"mensaje": "Backend del simulador activo"}
 
-# 🚨 Emergencias
 class Emergencia(BaseModel):
     zona: str
     tipo_via: str
     distancia_km: float
 
 def calcular_eta(distancia_km, tipo_via):
-    velocidad = 60 if tipo_via == "avenida" else 40  # km/h
-    eta = (distancia_km / velocidad) * 60            # minutos
+    velocidad = 60 if tipo_via == "avenida" else 40
+    eta = (distancia_km / velocidad) * 60
     return round(eta, 2)
 
 def asignar_ambulancia(datos: Emergencia):
@@ -55,7 +52,7 @@ def asignar_ambulancia_ia(datos: Emergencia):
         "justificacion": justificacion
     }
 
-# 🧭 Geocodificación: Dirección → Coordenadas (VERSIÓN FINAL CORREGIDA)
+# 🧭 Geocodificación: Dirección → Coordenadas (AHORA SÍ, LA VERSIÓN FINAL)
 async def geocodificar_direccion(request: Request):
     data = await request.json()
     direccion = data.get("direccion")
@@ -63,10 +60,9 @@ async def geocodificar_direccion(request: Request):
     if not direccion:
         return {"error": "No se proporcionó ninguna dirección"}
 
-    # Codificamos manualmente la dirección para que sea segura en una URL
-    direccion_codificada = quote(direccion)
+    # CAMBIO 2: Usamos quote_plus para convertir espacios en '+'
+    direccion_codificada = quote_plus(direccion)
     
-    # Volvemos al método de f-string que funcionaba, pero con la dirección ya segura
     url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion_codificada}"
     
     headers = {
@@ -76,7 +72,6 @@ async def geocodificar_direccion(request: Request):
     try:
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        
         datos = response.json()
         
         if datos:
