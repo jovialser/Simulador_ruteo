@@ -63,7 +63,24 @@ async def geocodificar_direccion(request: Request):
     data = await request.json()
     direccion = data["direccion"]
 
-    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
+
+
+ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
+
+    bbox = BOUNDING_BOXES.get(ciudad)
+    if not bbox:
+        return {"error": "Ciudad no soportada"}
+
+    # 🧭 Construir URL con bounding box
+    bbox_str = ",".join(map(str, bbox))
+    url = (
+        f"https://nominatim.openstreetmap.org/search"
+        f"?format=json&q={direccion}"
+        f"&viewbox={bbox_str}&bounded=1"
+    )
+
+
+    
     response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
     datos = response.json()
 
