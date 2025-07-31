@@ -63,7 +63,7 @@ async def geocodificar_direccion(request: Request):
     data = await request.json()
     direccion = data["direccion"]
 
-    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}, Buenos Aires"
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
     response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
     datos = response.json()
 
