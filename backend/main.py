@@ -1,35 +1,37 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests
+import requests  # 👈 Import necesario para usar Nominatim
 
 app = FastAPI()
 
-# Middleware CORS
+# 👇 Agregamos el middleware CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://simulador-ruteo.vercel.app"],
+    allow_origins=[
+        "https://simulador-ruteo.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+@app.get("/")
 def inicio():
     return {"mensaje": "Backend del simulador activo"}
 
-# Clase Emergencia
+# 🚨 Emergencias
 class Emergencia(BaseModel):
-    zona: str
-    tipo_via: str
+    zona: str         # Ej: "Belgrano"
+    tipo_via: str     # "avenida" o "calle"
     distancia_km: float
 
-# Función para calcular ETA
 def calcular_eta(distancia_km, tipo_via):
-    velocidad = 60 if tipo_via == "avenida" else 40
-    eta = (distancia_km / velocidad) * 60
+    velocidad = 60 if tipo_via == "avenida" else 40  # km/h
+    eta = (distancia_km / velocidad) * 60            # minutos
     return round(eta, 2)
 
-# Endpoint /asignar
+@app.post("/asignar")
 def asignar_ambulancia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via)
     ambulancia = f"AMB-{hash(datos.zona) % 100:02d}"
@@ -40,7 +42,7 @@ def asignar_ambulancia(datos: Emergencia):
         "eta_minutos": eta
     }
 
-# Endpoint /asignar-ia
+@app.post("/asignar-ia")
 def asignar_ambulancia_ia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via) * 0.9
     ambulancia = f"AMB-{(hash(datos.zona) + 42) % 100:02d}"
@@ -55,16 +57,14 @@ def asignar_ambulancia_ia(datos: Emergencia):
         "justificacion": justificacion
     }
 
-# Endpoint /geocodificar (Versión Original y Estable)
+# 🧭 Geocodificación: Dirección → Coordenadas
+@app.post("/geocodificar")
 async def geocodificar_direccion(request: Request):
     data = await request.json()
     direccion = data["direccion"]
 
     url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
-    
-    headers = {'User-Agent': 'SimuladorDeRuteo/1.0'}
-    
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
     datos = response.json()
 
     if datos:
