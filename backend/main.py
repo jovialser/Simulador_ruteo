@@ -60,8 +60,8 @@ def asignar_ambulancia_ia(datos: Emergencia):
 # 🧭 Geocodificación: Dirección → Coordenadas
 @app.post("/geocodificar")
 async def geocodificar_direccion(request: Request):
-    data = await request.json()
-    direccion = data["direccion"]
+direccion = data["direccion"]
+ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
 
 
 # 📦 Bounding boxes por ciudad
@@ -72,7 +72,6 @@ BOUNDING_BOXES = {
     "Mendoza": [-69.646, -35.619, -67.413, -32.345],
     "La Plata": [-58.052, -35.000, -57.890, -34.890]
 }
-ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
 
     bbox = BOUNDING_BOXES.get(ciudad)
     if not bbox:
