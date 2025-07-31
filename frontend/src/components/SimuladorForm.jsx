@@ -14,7 +14,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
 
   const ciudadesArgentinas = [
-    "Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata"
+    "Ciudad de Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata"
   ];
 
   const coordenadasZona = {
