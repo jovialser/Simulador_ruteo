@@ -50,7 +50,8 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
       const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ direccion: direccionCompleta })
+        body: JSON.stringify({ direccion: direccionCompleta,
+                               ciudad: ciudad  // 👈 Agregá esto })
       });
 
       const data = await res.json();
@@ -84,7 +85,8 @@ const buscarUbicacionDestino = async () => {
     const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ direccion: direccionCompleta })
+      body: JSON.stringify({ direccion: direccionCompleta,
+                             ciudad: ciudad  // 👈 Agregá esto})
     });
 
     const data = await res.json();
