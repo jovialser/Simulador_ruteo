@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import requests  # 👈 Import necesario para usar Nominatim
+import requests
 
 app = FastAPI()
 
@@ -16,14 +16,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
 def inicio():
     return {"mensaje": "Backend del simulador activo"}
 
 # 🚨 Emergencias
 class Emergencia(BaseModel):
-    zona: str         # Ej: "Belgrano"
-    tipo_via: str     # "avenida" o "calle"
+    zona: str
+    tipo_via: str
     distancia_km: float
 
 def calcular_eta(distancia_km, tipo_via):
@@ -31,7 +30,6 @@ def calcular_eta(distancia_km, tipo_via):
     eta = (distancia_km / velocidad) * 60            # minutos
     return round(eta, 2)
 
-@app.post("/asignar")
 def asignar_ambulancia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via)
     ambulancia = f"AMB-{hash(datos.zona) % 100:02d}"
@@ -42,7 +40,6 @@ def asignar_ambulancia(datos: Emergencia):
         "eta_minutos": eta
     }
 
-@app.post("/asignar-ia")
 def asignar_ambulancia_ia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via) * 0.9
     ambulancia = f"AMB-{(hash(datos.zona) + 42) % 100:02d}"
@@ -57,19 +54,47 @@ def asignar_ambulancia_ia(datos: Emergencia):
         "justificacion": justificacion
     }
 
-# 🧭 Geocodificación: Dirección → Coordenadas
-@app.post("/geocodificar")
+# 🧭 Geocodificación: Dirección → Coordenadas (VERSIÓN MEJORADA Y SEGURA)
 async def geocodificar_direccion(request: Request):
     data = await request.json()
-    direccion = data["direccion"]
+    direccion = data.get("direccion")
 
-    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
-    response = requests.get(url, headers={"User-Agent": "simulador-ruteo"})
-    datos = response.json()
+    # Verificación para asegurarse de que la dirección no esté vacía
+    if not direccion:
+        return {"error": "No se proporcionó ninguna dirección"}
 
-    if datos:
-        lat = datos[0]["lat"]
-        lon = datos[0]["lon"]
-        return {"lat": lat, "lng": lon}
-    else:
-        return {"error": "Dirección no encontrada"}
+    # URL base de la API de Nominatim
+    url_base = "https://nominatim.openstreetmap.org/search"
+
+    # Parámetros de la consulta. 'requests' se encargará de codificar la dirección.
+    params = {
+        'q': direccion,
+        'format': 'json'
+    }
+    
+    # Cabecera User-Agent (buena práctica recomendada por Nominatim)
+    headers = {
+        'User-Agent': 'SimuladorDeRuteo/1.0 (https://simulador-ruteo.vercel.app)'
+    }
+
+    try:
+        # Realizamos la petición GET de forma segura
+        response = requests.get(url_base, params=params, headers=headers)
+        # Lanza un error si la respuesta HTTP no fue exitosa (ej. 404, 500)
+        response.raise_for_status()
+        
+        datos = response.json()
+        
+        # Si la respuesta contiene datos, tomamos el primer resultado
+        if datos:
+            lat = datos[0]["lat"]
+            lon = datos[0]["lon"]
+            return {"lat": lat, "lng": lon}
+
+    except requests.exceptions.RequestException:
+        # Captura cualquier error de red (timeout, DNS, etc.) o de estado HTTP.
+        # Devolvemos un error genérico al cliente.
+        return {"error": "Error de comunicación con el servicio de geocodificación"}
+
+    # Si la API no devuelve datos, significa que no encontró la dirección
+    return {"error": "Dirección no encontrada"}
