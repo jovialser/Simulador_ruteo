@@ -64,7 +64,14 @@ async def geocodificar_direccion(request: Request):
     direccion = data["direccion"]
 
 
-
+# 📦 Bounding boxes por ciudad
+BOUNDING_BOXES = {
+    "Ciudad de Buenos Aires": [-58.531, -34.705, -58.335, -34.526],
+    "Córdoba": [-64.264, -31.500, -64.059, -31.340],
+    "Rosario": [-60.765, -32.997, -60.620, -32.880],
+    "Mendoza": [-69.646, -35.619, -67.413, -32.345],
+    "La Plata": [-58.052, -35.000, -57.890, -34.890]
+}
 ciudad = data.get("ciudad")  # 👈 Asegurate de enviar esto desde el frontend
 
     bbox = BOUNDING_BOXES.get(ciudad)
