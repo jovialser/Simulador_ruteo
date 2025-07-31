@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
+from urllib.parse import quote # <--- IMPORTANTE: Añadir esta línea
 
 app = FastAPI()
 
@@ -54,47 +55,36 @@ def asignar_ambulancia_ia(datos: Emergencia):
         "justificacion": justificacion
     }
 
-# 🧭 Geocodificación: Dirección → Coordenadas (VERSIÓN MEJORADA Y SEGURA)
+# 🧭 Geocodificación: Dirección → Coordenadas (VERSIÓN FINAL CORREGIDA)
 async def geocodificar_direccion(request: Request):
     data = await request.json()
     direccion = data.get("direccion")
 
-    # Verificación para asegurarse de que la dirección no esté vacía
     if not direccion:
         return {"error": "No se proporcionó ninguna dirección"}
 
-    # URL base de la API de Nominatim
-    url_base = "https://nominatim.openstreetmap.org/search"
-
-    # Parámetros de la consulta. 'requests' se encargará de codificar la dirección.
-    params = {
-        'q': direccion,
-        'format': 'json'
-    }
+    # Codificamos manualmente la dirección para que sea segura en una URL
+    direccion_codificada = quote(direccion)
     
-    # Cabecera User-Agent (buena práctica recomendada por Nominatim)
+    # Volvemos al método de f-string que funcionaba, pero con la dirección ya segura
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion_codificada}"
+    
     headers = {
         'User-Agent': 'SimuladorDeRuteo/1.0 (https://simulador-ruteo.vercel.app)'
     }
 
     try:
-        # Realizamos la petición GET de forma segura
-        response = requests.get(url_base, params=params, headers=headers)
-        # Lanza un error si la respuesta HTTP no fue exitosa (ej. 404, 500)
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         
         datos = response.json()
         
-        # Si la respuesta contiene datos, tomamos el primer resultado
         if datos:
             lat = datos[0]["lat"]
             lon = datos[0]["lon"]
             return {"lat": lat, "lng": lon}
 
     except requests.exceptions.RequestException:
-        # Captura cualquier error de red (timeout, DNS, etc.) o de estado HTTP.
-        # Devolvemos un error genérico al cliente.
         return {"error": "Error de comunicación con el servicio de geocodificación"}
 
-    # Si la API no devuelve datos, significa que no encontró la dirección
     return {"error": "Dirección no encontrada"}
