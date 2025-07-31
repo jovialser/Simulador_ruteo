@@ -108,43 +108,6 @@ const buscarUbicacionDestino = async () => {
     alert("Hubo un problema al conectarse con el backend.");
   }
 };
-const buscarUbicacionDestino = async () => {
-  if (!direccionDestino.trim() || !ciudad.trim()) {
-    alert("Ingresá una ciudad y una dirección de destino");
-    return;
-  }
-
-  const direccionCompleta = `${direccionDestino}, ${ciudad}, Argentina`;
-  console.log("📨 Enviando dirección destino:", direccionCompleta);
-
-  try {
-    const res = await fetch("https://simulador-ruteo.onrender.com/geocodificar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ direccion: direccionCompleta })
-    });
-
-    const data = await res.json();
-
-    if (data.lat && data.lng) {
-      setUbicacionDestino({ lat: parseFloat(data.lat), lng: parseFloat(data.lng) });
-      alert(`📍 Ubicación destino encontrada: ${data.lat}, ${data.lng}`);
-      console.log("📌 Coordenadas destino:", data.lat, data.lng);
-
-      if (onCoordenadasSeleccionadas) {
-        onCoordenadasSeleccionadas({
-          origen: ubicacion,
-          destino: { lat: parseFloat(data.lat), lng: parseFloat(data.lng) }
-        });
-      }
-    } else {
-      alert("❌ Dirección destino no encontrada.");
-    }
-  } catch (err) {
-    console.error("⚠️ Error al buscar ubicación destino:", err);
-    alert("Hubo un problema al conectarse con el backend.");
-  }
-};
 
   const enviar = async (e) => {
     e.preventDefault();
@@ -225,6 +188,31 @@ const buscarUbicacionDestino = async () => {
         {ubicacion && (
           <p>🧭 Coordenadas: <strong>{ubicacion.lat}, {ubicacion.lng}</strong></p>
         )}
+
+
+
+
+        
+{/* Campo de dirección destino */}
+<label>📍 Dirección destino:
+  <input
+    type="text"
+    placeholder="Ej: Av. Santa Fe 4321"
+    value={direccionDestino}
+    onChange={(e) => setDireccionDestino(e.target.value)}
+    style={{ margin: "0.5rem 0" }}
+  />
+</label>
+<br />
+<button onClick={buscarUbicacionDestino}>Buscar dirección destino</button>
+
+{ubicacionDestino && (
+  <p>🎯 Coordenadas destino: <strong>{ubicacionDestino.lat}, {ubicacionDestino.lng}</strong></p>
+)}
+
+
+
+        
       </div>
 
       {/* 🧪 Formulario de simulación */}
