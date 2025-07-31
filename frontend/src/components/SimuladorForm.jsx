@@ -39,7 +39,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
       return;
     }
 
-    const direccionCompleta = "${direccion}, ${ciudad}, Argentina";
+    const direccionCompleta = `${direccion}, ${ciudad}, Argentina`;
     console.log("📨 Enviando dirección:", direccionCompleta);
 
     try {
