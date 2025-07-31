@@ -2,11 +2,10 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import requests
-from urllib.parse import quote_plus  # <--- CAMBIO 1: Importamos quote_plus
 
 app = FastAPI()
 
-# ... (todo el resto del código no cambia) ...
+# Middleware CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://simulador-ruteo.vercel.app"],
@@ -18,16 +17,19 @@ app.add_middleware(
 def inicio():
     return {"mensaje": "Backend del simulador activo"}
 
+# Clase Emergencia
 class Emergencia(BaseModel):
     zona: str
     tipo_via: str
     distancia_km: float
 
+# Función para calcular ETA
 def calcular_eta(distancia_km, tipo_via):
     velocidad = 60 if tipo_via == "avenida" else 40
     eta = (distancia_km / velocidad) * 60
     return round(eta, 2)
 
+# Endpoint /asignar
 def asignar_ambulancia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via)
     ambulancia = f"AMB-{hash(datos.zona) % 100:02d}"
@@ -38,6 +40,7 @@ def asignar_ambulancia(datos: Emergencia):
         "eta_minutos": eta
     }
 
+# Endpoint /asignar-ia
 def asignar_ambulancia_ia(datos: Emergencia):
     eta = calcular_eta(datos.distancia_km, datos.tipo_via) * 0.9
     ambulancia = f"AMB-{(hash(datos.zona) + 42) % 100:02d}"
@@ -52,34 +55,21 @@ def asignar_ambulancia_ia(datos: Emergencia):
         "justificacion": justificacion
     }
 
-# 🧭 Geocodificación: Dirección → Coordenadas (AHORA SÍ, LA VERSIÓN FINAL)
+# Endpoint /geocodificar (Versión Original y Estable)
 async def geocodificar_direccion(request: Request):
     data = await request.json()
-    direccion = data.get("direccion")
+    direccion = data["direccion"]
 
-    if not direccion:
-        return {"error": "No se proporcionó ninguna dirección"}
-
-    # CAMBIO 2: Usamos quote_plus para convertir espacios en '+'
-    direccion_codificada = quote_plus(direccion)
+    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion}"
     
-    url = f"https://nominatim.openstreetmap.org/search?format=json&q={direccion_codificada}"
+    headers = {'User-Agent': 'SimuladorDeRuteo/1.0'}
     
-    headers = {
-        'User-Agent': 'SimuladorDeRuteo/1.0 (https://simulador-ruteo.vercel.app)'
-    }
+    response = requests.get(url, headers=headers)
+    datos = response.json()
 
-    try:
-        response = requests.get(url, headers=headers)
-        response.raise_for_status()
-        datos = response.json()
-        
-        if datos:
-            lat = datos[0]["lat"]
-            lon = datos[0]["lon"]
-            return {"lat": lat, "lng": lon}
-
-    except requests.exceptions.RequestException:
-        return {"error": "Error de comunicación con el servicio de geocodificación"}
-
-    return {"error": "Dirección no encontrada"}
+    if datos:
+        lat = datos[0]["lat"]
+        lon = datos[0]["lon"]
+        return {"lat": lat, "lng": lon}
+    else:
+        return {"error": "Dirección no encontrada"}
