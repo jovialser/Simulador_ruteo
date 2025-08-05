@@ -10,6 +10,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
   const [ubicacion, setUbicacion] = useState(null);
   const [direccionDestino, setDireccionDestino] = useState("");
   const [ubicacionDestino, setUbicacionDestino] = useState(null);
+  const [coordenadasRuta, setCoordenadasRuta] = useState({ origen: null, destino: null });
 
   const ciudadesArgentinas = [
     "Ciudad de Buenos Aires", "Córdoba", "Rosario", "Mendoza", "La Plata"
@@ -54,21 +55,29 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
       const data = await res.json();
       if (data.lat && data.lng) {
         const coords = { lat: parseFloat(data.lat), lng: parseFloat(data.lng) };
+
         if (tipo === "destino") {
           setUbicacionDestino(coords);
+          setCoordenadasRuta(prev => {
+            const nuevas = { ...prev, destino: coords };
+            if (nuevas.origen && onCoordenadasSeleccionadas) {
+              onCoordenadasSeleccionadas(nuevas);
+            }
+            return nuevas;
+          });
         } else {
           setUbicacion(coords);
+          setCoordenadasRuta(prev => {
+            const nuevas = { ...prev, origen: coords };
+            if (nuevas.destino && onCoordenadasSeleccionadas) {
+              onCoordenadasSeleccionadas(nuevas);
+            }
+            return nuevas;
+          });
         }
 
         alert(`📍 Ubicación ${tipo} encontrada: ${data.lat}, ${data.lng}`);
         console.log(`📌 Coordenadas ${tipo}:`, data.lat, data.lng);
-
-        if (onCoordenadasSeleccionadas) {
-          onCoordenadasSeleccionadas({
-            origen: tipo === "destino" ? ubicacion : coords,
-            destino: tipo === "destino" ? coords : null,
-          });
-        }
       } else {
         alert(`❌ Dirección ${tipo} no encontrada.`);
       }
@@ -127,6 +136,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
       setDireccionDestino("");
       setUbicacion(null);
       setUbicacionDestino(null);
+      setCoordenadasRuta({ origen: null, destino: null });
     } catch (err) {
       console.error("❌ Error en fetch:", err.message);
       setResultado(null);
@@ -205,13 +215,14 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
 
       {/* 🎯 Resultado */}
       {resultado && (
-        <>
-          <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
-            <h2>🟢 Resultado (Tradicional)</h2>
-            <p>Ambulancia: <strong>{resultado.ambulancia}</strong></p>
-            <p>ETA: <strong>{resultado.eta_minutos} minutos</strong></p>
-            <p>Zona: {resultado.zona}</p>
+        <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
+          <h2>🟢 Resultado (Tradicional)</h2>
+          <p>Ambulancia: <strong>{resultado.ambulancia}</strong></p>
+          <p>ETA: <strong>{resultado.eta_minutos} minutos</strong></p>
+          <p>Zona: {resultado.zona}</>
             <p>Tipo de vía: {resultado.tipo_via}</p>
           </div>
   );
 }
+
+
