@@ -220,7 +220,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
           <p>Ambulancia: <strong>{resultado.ambulancia}</strong></p>
           <p>ETA: <strong>{resultado.eta_minutos} minutos</strong></p>
           <p>Zona: <strong>{resultado.zona}</strong></p>
-            <p>Tipo de vía: {resultado.tipo_via}</p>
+            <p>Tipo de vía: <strong>{resultado.tipo_via}</strong></p>
           </div>
   );
 }
