@@ -213,16 +213,6 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         <button type="submit">Asignar Ambulancia</button>
       </form>
 
-      {/* 🎯 Resultado */}
-      {resultado && (
-        <div style={{ marginTop: "1rem", background: "#e3ffe3", padding: "1rem", borderRadius: "8px" }}>
-          <h2>🟢 Resultado (Tradicional)</h2>
-          <p>Ambulancia: <strong>{resultado.ambulancia}</strong></p>
-          <p>ETA: <strong>{resultado.eta_minutos} minutos</strong></p>
-          <p>Zona: <strong>{resultado.zona}</strong></p>
-            <p>Tipo de vía: <strong>{resultado.tipo_via}</strong></p>
-          </div>
-  );
-}
+     
 
 
