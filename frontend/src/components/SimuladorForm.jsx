@@ -212,8 +212,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
         </label><br />
         <button type="submit">Asignar Ambulancia</button>
       </form>
-            </form>
-    </div> {/* ← Este cierre faltaba */}
+      </div> {/* ← Este cierre faltaba */}
   );
 }
 
