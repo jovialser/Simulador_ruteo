@@ -219,7 +219,7 @@ export default function SimuladorForm({ onCoordenadasSeleccionadas }) {
           <h2>🟢 Resultado (Tradicional)</h2>
           <p>Ambulancia: <strong>{resultado.ambulancia}</strong></p>
           <p>ETA: <strong>{resultado.eta_minutos} minutos</strong></p>
-          <p>Zona: {resultado.zona}</p>
+          <p>Zona: <strong>{resultado.zona}</strong></p>
             <p>Tipo de vía: {resultado.tipo_via}</p>
           </div>
   );
